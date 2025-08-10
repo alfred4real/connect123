@@ -1,8 +1,9 @@
+import { useState } from "react";
 import Post from "./Post";
 import CreatePost from "./CreatePost";
 
 const Feed = () => {
-  const posts = [
+  const [posts, setPosts] = useState([
     {
       author: {
         name: "Sarah Johnson",
@@ -49,11 +50,26 @@ const Feed = () => {
       comments: 16,
       shares: 5
     }
-  ];
+  ]);
+
+  const handleNewPost = (content: string) => {
+    const newPost = {
+      author: {
+        name: "John Doe",
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+        time: "now"
+      },
+      content,
+      likes: 0,
+      comments: 0,
+      shares: 0
+    };
+    setPosts([newPost, ...posts]);
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 p-4">
-      <CreatePost />
+      <CreatePost onPost={handleNewPost} />
       {posts.map((post, index) => (
         <Post key={index} {...post} />
       ))}

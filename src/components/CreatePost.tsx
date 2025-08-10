@@ -6,13 +6,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 
-const CreatePost = () => {
+interface CreatePostProps {
+  onPost: (content: string) => void;
+}
+
+const CreatePost = ({ onPost }: CreatePostProps) => {
   const [postContent, setPostContent] = useState("");
 
   const handlePost = () => {
     if (postContent.trim()) {
-      // Here you would typically send the post to your backend
-      console.log("Posting:", postContent);
+      onPost(postContent);
       setPostContent("");
     }
   };
