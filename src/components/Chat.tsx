@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 interface ChatProps {
   isOpen: boolean;
   onClose: () => void;
+  selectedFriend?: any;
 }
 
 interface Message {
@@ -31,8 +32,8 @@ interface ChatContact {
   unreadCount?: number;
 }
 
-const Chat = ({ isOpen, onClose }: ChatProps) => {
-  const [selectedChat, setSelectedChat] = useState<string | null>(null);
+const Chat = ({ isOpen, onClose, selectedFriend }: ChatProps) => {
+  const [selectedChat, setSelectedChat] = useState<string | null>(selectedFriend?.id || null);
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -118,7 +119,9 @@ const Chat = ({ isOpen, onClose }: ChatProps) => {
       <div className="ml-auto w-96 bg-card shadow-xl border-l flex flex-col h-full relative z-10">
         {/* Header */}
         <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Messages</h2>
+          <h2 className="text-lg font-semibold">
+            {selectedFriend ? `Chat with ${selectedFriend.name}` : "Messages"}
+          </h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
           </Button>
