@@ -3,14 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const menuItems = [
-    { icon: Home, label: "Feed", active: true },
-    { icon: Users, label: "Friends", count: 12 },
-    { icon: BookOpen, label: "Pages", count: 3 },
-    { icon: Calendar, label: "Events", count: 2 },
-    { icon: Settings, label: "Settings" },
+    { icon: Home, label: "Feed", path: "/" },
+    { icon: Users, label: "Friends", path: "/friends", count: 12 },
+    { icon: BookOpen, label: "Pages", path: "/pages", count: 3 },
+    { icon: Calendar, label: "Events", path: "/events", count: 2 },
+    { icon: Settings, label: "Settings", path: "/settings" },
   ];
 
   const trendingTopics = [
@@ -36,8 +40,9 @@ const Sidebar = () => {
             {menuItems.map((item, index) => (
               <Button
                 key={index}
-                variant={item.active ? "default" : "ghost"}
-                className={`w-full justify-start ${item.active ? "bg-primary text-primary-foreground" : ""}`}
+                variant={location.pathname === item.path ? "default" : "ghost"}
+                className={`w-full justify-start ${location.pathname === item.path ? "bg-primary text-primary-foreground" : ""}`}
+                onClick={() => navigate(item.path)}
               >
                 <item.icon className="mr-3 h-4 w-4" />
                 {item.label}
