@@ -101,8 +101,10 @@ const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownProps) =>
 
   if (!isOpen) return null;
 
+  console.log("NotificationDropdown rendering, isOpen:", isOpen);
+
   return (
-    <div className="fixed inset-0 z-50 flex justify-end pt-16 pr-4">
+    <div className="fixed inset-0 z-[60] flex justify-end pt-16 pr-4">
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/20" onClick={onClose} />
       

@@ -10,7 +10,7 @@ const Header = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+    <header className="sticky top-0 z-40 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center space-x-4">
@@ -55,10 +55,12 @@ const Header = () => {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="hover:bg-primary/10 relative"
-            onClick={() => {
-              console.log("Bell clicked, current state:", isNotificationOpen);
-              setIsNotificationOpen(true);
+            className="hover:bg-primary/10 relative z-50"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log("Bell clicked!");
+              setIsNotificationOpen(!isNotificationOpen);
             }}
           >
             <Bell className="h-5 w-5" />
