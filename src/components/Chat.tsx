@@ -35,30 +35,85 @@ interface ChatContact {
 const Chat = ({ isOpen, onClose, selectedFriend }: ChatProps) => {
   const [selectedChat, setSelectedChat] = useState<string | null>(selectedFriend?.id || null);
   const [newMessage, setNewMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      content: "Hey! How are you doing?",
-      sender: "other",
-      timestamp: "2:30 PM",
-      senderName: "Sarah Johnson",
-      senderAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face"
-    },
-    {
-      id: "2",
-      content: "I'm doing great! Just working on some new features for our platform.",
-      sender: "me",
-      timestamp: "2:32 PM"
-    },
-    {
-      id: "3",
-      content: "That sounds exciting! Can't wait to see what you're building 🚀",
-      sender: "other",
-      timestamp: "2:33 PM",
-      senderName: "Sarah Johnson",
-      senderAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face"
-    }
-  ]);
+  
+  // Messages organized by friend ID
+  const [allMessages, setAllMessages] = useState<{ [friendId: string]: Message[] }>({
+    "1": [
+      {
+        id: "1",
+        content: "Hey! How are you doing?",
+        sender: "other",
+        timestamp: "2:30 PM",
+        senderName: "Alice Johnson",
+        senderAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face"
+      },
+      {
+        id: "2",
+        content: "I'm doing great! Just working on some new features for our platform.",
+        sender: "me",
+        timestamp: "2:32 PM"
+      },
+      {
+        id: "3",
+        content: "That sounds exciting! Can't wait to see what you're building 🚀",
+        sender: "other",
+        timestamp: "2:33 PM",
+        senderName: "Alice Johnson",
+        senderAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face"
+      }
+    ],
+    "2": [
+      {
+        id: "4",
+        content: "Hi Mike! Thanks for helping me with the code review yesterday.",
+        sender: "me",
+        timestamp: "1:20 PM"
+      },
+      {
+        id: "5",
+        content: "No problem! Your implementation was really clean.",
+        sender: "other",
+        timestamp: "1:22 PM",
+        senderName: "Mike Chen",
+        senderAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
+      }
+    ],
+    "3": [
+      {
+        id: "6",
+        content: "Love the new design you shared!",
+        sender: "me",
+        timestamp: "12:15 PM"
+      },
+      {
+        id: "7",
+        content: "Thank you! I'm really excited about this new direction.",
+        sender: "other",
+        timestamp: "12:17 PM",
+        senderName: "Sarah Williams",
+        senderAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face"
+      }
+    ],
+    "4": [
+      {
+        id: "8",
+        content: "How's the new business venture going?",
+        sender: "me",
+        timestamp: "11:30 AM"
+      },
+      {
+        id: "9",
+        content: "Really well! We just closed our first round of funding.",
+        sender: "other",
+        timestamp: "11:35 AM",
+        senderName: "David Brown",
+        senderAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
+      }
+    ]
+  });
+
+  // Get messages for the currently selected chat
+  const messages = selectedChat ? (allMessages[selectedChat] || []) : [];
 
   const [contacts] = useState<ChatContact[]>([
     {
@@ -96,7 +151,10 @@ const Chat = ({ isOpen, onClose, selectedFriend }: ChatProps) => {
         sender: "me",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      setMessages([...messages, message]);
+      setAllMessages(prev => ({
+        ...prev,
+        [selectedChat]: [...(prev[selectedChat] || []), message]
+      }));
       setNewMessage("");
     }
   };
