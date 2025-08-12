@@ -104,12 +104,12 @@ const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownProps) =>
   console.log("NotificationDropdown rendering, isOpen:", isOpen);
 
   return (
-    <div className="fixed inset-0 z-[60] flex justify-end pt-16 pr-4">
+    <div className="fixed top-16 right-4 z-[60] w-80">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/20" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/20 z-[-1]" onClick={onClose} />
       
       {/* Dropdown */}
-      <div className="relative bg-card shadow-lg border rounded-lg w-80 max-h-96 flex flex-col">
+      <div className="bg-background border shadow-lg rounded-lg max-h-96 flex flex-col">
         {/* Header */}
         <div className="p-4 border-b flex items-center justify-between">
           <div className="flex items-center space-x-2">
