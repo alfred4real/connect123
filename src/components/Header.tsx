@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Chat from "./Chat";
+import NotificationDropdown from "./NotificationDropdown";
 
 const Header = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
