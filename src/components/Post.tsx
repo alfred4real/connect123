@@ -6,6 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 
+interface Comment {
+  id: string;
+  author: string;
+  avatar: string;
+  content: string;
+  time: string;
+}
+
 interface PostProps {
   author: {
     name: string;
@@ -23,10 +31,32 @@ const Post = ({ author, content, image, likes, comments, shares }: PostProps) =>
   const [isLiked, setIsLiked] = useState(false);
   const [currentLikes, setCurrentLikes] = useState(likes);
   const [showComments, setShowComments] = useState(false);
+  const [commentsList, setCommentsList] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     setCurrentLikes(isLiked ? currentLikes - 1 : currentLikes + 1);
+  };
+
+  const handleAddComment = () => {
+    if (newComment.trim()) {
+      const comment: Comment = {
+        id: Date.now().toString(),
+        author: "John Doe", // Current user
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+        content: newComment.trim(),
+        time: "now"
+      };
+      setCommentsList([...commentsList, comment]);
+      setNewComment("");
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleAddComment();
+    }
   };
 
   return (
@@ -66,7 +96,7 @@ const Post = ({ author, content, image, likes, comments, shares }: PostProps) =>
         <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
           <span>{currentLikes} likes</span>
           <div className="flex space-x-4">
-            <span>{comments} comments</span>
+            <span>{comments + commentsList.length} comments</span>
             <span>{shares} shares</span>
           </div>
         </div>
@@ -105,16 +135,49 @@ const Post = ({ author, content, image, likes, comments, shares }: PostProps) =>
         {showComments && (
           <>
             <Separator className="my-3" />
+            
+            {/* Existing Comments */}
+            {commentsList.length > 0 && (
+              <div className="space-y-3 mb-4">
+                {commentsList.map((comment) => (
+                  <div key={comment.id} className="flex space-x-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={comment.avatar} />
+                      <AvatarFallback>{comment.author[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="bg-muted/50 rounded-lg p-3">
+                        <p className="font-medium text-sm">{comment.author}</p>
+                        <p className="text-sm">{comment.content}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">{comment.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Add New Comment */}
             <div className="flex space-x-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" />
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
-              <div className="flex-1">
+              <div className="flex-1 flex space-x-2">
                 <Input 
                   placeholder="Write a comment..." 
-                  className="bg-muted/30 border-none"
+                  className="bg-muted/30 border-none flex-1"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  onKeyPress={handleKeyPress}
                 />
+                <Button 
+                  size="sm" 
+                  onClick={handleAddComment}
+                  disabled={!newComment.trim()}
+                >
+                  Post
+                </Button>
               </div>
             </div>
           </>
