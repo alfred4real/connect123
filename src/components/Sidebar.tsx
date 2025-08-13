@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Home, Users, BookOpen, Calendar, Settings, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [addedFriends, setAddedFriends] = useState<string[]>([]);
   
   const menuItems = [
     { icon: Home, label: "Feed", path: "/" },
@@ -30,6 +32,10 @@ const Sidebar = () => {
     { name: "Mike Chen", mutualFriends: 3, avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
     { name: "Sarah Williams", mutualFriends: 8, avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" },
   ];
+
+  const handleAddFriend = (friendName: string) => {
+    setAddedFriends([...addedFriends, friendName]);
+  };
 
   return (
     <aside className="w-80 h-screen sticky top-16 overflow-y-auto border-r bg-card/50 p-4 space-y-4">
@@ -102,9 +108,19 @@ const Sidebar = () => {
                   {friend.mutualFriends} mutual friends
                 </p>
               </div>
-              <Button size="sm" variant="outline">
-                Add
-              </Button>
+              {addedFriends.includes(friend.name) ? (
+                <Button size="sm" variant="outline" disabled>
+                  Added
+                </Button>
+              ) : (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleAddFriend(friend.name)}
+                >
+                  Add
+                </Button>
+              )}
             </div>
           ))}
         </CardContent>
