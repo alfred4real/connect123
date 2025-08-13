@@ -13,6 +13,7 @@ const Friends = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [addedFriends, setAddedFriends] = useState<number[]>([]);
   const friends = [
     {
       id: 1,
@@ -60,6 +61,37 @@ const Friends = () => {
     }
   ];
 
+  const suggestedFriends = [
+    {
+      id: 101,
+      name: "Emma Davis",
+      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face",
+      mutualFriends: 3,
+      location: "Seattle, WA",
+    },
+    {
+      id: 102,
+      name: "James Wilson",
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
+      mutualFriends: 7,
+      location: "Boston, MA",
+    },
+    {
+      id: 103,
+      name: "Lisa Garcia",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face",
+      mutualFriends: 2,
+      location: "Miami, FL",
+    },
+    {
+      id: 104,
+      name: "Tom Anderson",
+      avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face",
+      mutualFriends: 5,
+      location: "Austin, TX",
+    }
+  ];
+
   const handleMessage = (friend: any) => {
     setSelectedFriend(friend);
     setIsChatOpen(true);
@@ -68,6 +100,10 @@ const Friends = () => {
   const handleViewProfile = (friend: any) => {
     setSelectedFriend(friend);
     setIsProfileOpen(true);
+  };
+
+  const handleAddFriend = (friendId: number) => {
+    setAddedFriends([...addedFriends, friendId]);
   };
 
   return (
@@ -81,6 +117,52 @@ const Friends = () => {
               <Users className="h-8 w-8 text-primary" />
               <h1 className="text-3xl font-bold">Friends</h1>
             </div>
+
+            {/* People You May Know Section */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">People You May Know</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {suggestedFriends.map((person) => (
+                  <Card key={person.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader className="text-center pb-3">
+                      <Avatar className="h-16 w-16 mx-auto">
+                        <AvatarImage src={person.avatar} />
+                        <AvatarFallback>{person.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <CardTitle className="text-base">{person.name}</CardTitle>
+                      <p className="text-xs text-muted-foreground">{person.location}</p>
+                      <p className="text-xs text-muted-foreground">{person.mutualFriends} mutual friends</p>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      {addedFriends.includes(person.id) ? (
+                        <Button 
+                          variant="outline" 
+                          className="w-full" 
+                          size="sm"
+                          disabled
+                        >
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          Added
+                        </Button>
+                      ) : (
+                        <Button 
+                          className="w-full" 
+                          size="sm"
+                          onClick={() => handleAddFriend(person.id)}
+                        >
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          Add
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Your Friends Section */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Your Friends</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {friends.map((friend) => (
@@ -120,6 +202,7 @@ const Friends = () => {
                   </CardContent>
                 </Card>
               ))}
+            </div>
             </div>
           </div>
         </main>
