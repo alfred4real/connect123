@@ -59,6 +59,27 @@ const Post = ({ author, content, image, likes, comments, shares }: PostProps) =>
     }
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: `Post by ${author.name}`,
+      text: content,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy link to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        // You could add a toast notification here
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
   return (
     <Card className="shadow-sm hover:shadow-md transition-all duration-200">
       <CardHeader className="pb-3">
@@ -125,7 +146,12 @@ const Post = ({ author, content, image, likes, comments, shares }: PostProps) =>
             <MessageCircle className="mr-2 h-4 w-4" />
             Comment
           </Button>
-          <Button variant="ghost" size="sm" className="hover:bg-primary/10 hover:text-primary">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleShare}
+            className="hover:bg-primary/10 hover:text-primary"
+          >
             <Share className="mr-2 h-4 w-4" />
             Share
           </Button>
