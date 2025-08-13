@@ -3,12 +3,14 @@ import { Search, MessageCircle, Bell, User, Home, Users, Video } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
 import Chat from "./Chat";
 import NotificationDropdown from "./NotificationDropdown";
 
 const Header = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="container flex h-16 items-center justify-between px-4">
@@ -32,13 +34,28 @@ const Header = () => {
 
         {/* Navigation Icons */}
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="hover:bg-primary/10"
+            onClick={() => navigate("/")}
+          >
             <Home className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="hover:bg-primary/10"
+            onClick={() => navigate("/friends")}
+          >
             <Users className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="hover:bg-primary/10"
+            onClick={() => alert("Video call feature coming soon!")}
+          >
             <Video className="h-5 w-5" />
           </Button>
           <Button 
