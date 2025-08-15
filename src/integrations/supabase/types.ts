@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      friend_suggestions: {
+        Row: {
+          created_at: string
+          id: string
+          mutual_friends_count: number | null
+          suggested_user_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mutual_friends_count?: number | null
+          suggested_user_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mutual_friends_count?: number | null
+          suggested_user_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friend_suggestions_suggested_user_id_fkey"
+            columns: ["suggested_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "friend_suggestions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      friends: {
+        Row: {
+          created_at: string
+          friend_id: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_id: string
+          id?: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friends_friend_id_fkey"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "friends_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -58,7 +139,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_mutual_friends_count: {
+        Args: { user1_id: string; user2_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

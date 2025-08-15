@@ -6,104 +6,33 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Users, MessageCircle, UserPlus, MapPin, Calendar, Mail } from "lucide-react";
+import { Users, MessageCircle, UserPlus, MapPin, Calendar, Mail, Loader2 } from "lucide-react";
 import Chat from "@/components/Chat";
+import { useFriends, type Friend, type FriendSuggestion } from "@/hooks/useFriends";
+import { useAuth } from "@/hooks/useAuth";
 
 const Friends = () => {
+  const { user } = useAuth();
+  const { friends, suggestions, loading, sendFriendRequest } = useFriends();
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [selectedFriend, setSelectedFriend] = useState<any>(null);
+  const [selectedFriend, setSelectedFriend] = useState<Friend | FriendSuggestion | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [addedFriends, setAddedFriends] = useState<number[]>([]);
-  const friends = [
-    {
-      id: 1,
-      name: "Alice Johnson",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-      status: "online",
-      mutualFriends: 15,
-      location: "New York, NY",
-      email: "alice.johnson@email.com",
-      joinDate: "January 2023",
-      bio: "Digital marketing specialist who loves photography and travel. Always looking for new adventures!"
-    },
-    {
-      id: 2,
-      name: "Mike Chen",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      status: "offline",
-      mutualFriends: 8,
-      location: "San Francisco, CA",
-      email: "mike.chen@email.com",
-      joinDate: "March 2023",
-      bio: "Software engineer at a tech startup. Passionate about AI and machine learning."
-    },
-    {
-      id: 3,
-      name: "Sarah Williams",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      status: "online",
-      mutualFriends: 22,
-      location: "Los Angeles, CA",
-      email: "sarah.williams@email.com",
-      joinDate: "December 2022",
-      bio: "Creative director and designer. Love creating beautiful user experiences and interfaces."
-    },
-    {
-      id: 4,
-      name: "David Brown",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      status: "online",
-      mutualFriends: 5,
-      location: "Chicago, IL",
-      email: "david.brown@email.com",
-      joinDate: "February 2024",
-      bio: "Entrepreneur and business consultant. Helping startups grow and scale their operations."
-    }
-  ];
+  const [requestingSuggestions, setRequestingSuggestions] = useState<string[]>([]);
 
-  const suggestedFriends = [
-    {
-      id: 101,
-      name: "Emma Davis",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face",
-      mutualFriends: 3,
-      location: "Seattle, WA",
-    },
-    {
-      id: 102,
-      name: "James Wilson",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
-      mutualFriends: 7,
-      location: "Boston, MA",
-    },
-    {
-      id: 103,
-      name: "Lisa Garcia",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face",
-      mutualFriends: 2,
-      location: "Miami, FL",
-    },
-    {
-      id: 104,
-      name: "Tom Anderson",
-      avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face",
-      mutualFriends: 5,
-      location: "Austin, TX",
-    }
-  ];
-
-  const handleMessage = (friend: any) => {
+  const handleMessage = (friend: Friend | FriendSuggestion) => {
     setSelectedFriend(friend);
     setIsChatOpen(true);
   };
 
-  const handleViewProfile = (friend: any) => {
+  const handleViewProfile = (friend: Friend | FriendSuggestion) => {
     setSelectedFriend(friend);
     setIsProfileOpen(true);
   };
 
-  const handleAddFriend = (friendId: number) => {
-    setAddedFriends([...addedFriends, friendId]);
+  const handleAddFriend = async (suggestion: FriendSuggestion) => {
+    setRequestingSuggestions([...requestingSuggestions, suggestion.id]);
+    await sendFriendRequest(suggestion.suggested_user_id);
+    setRequestingSuggestions(requestingSuggestions.filter(id => id !== suggestion.id));
   };
 
   return (
@@ -118,92 +47,110 @@ const Friends = () => {
               <h1 className="text-3xl font-bold">Friends</h1>
             </div>
 
-            {/* People You May Know Section */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">People You May Know</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {suggestedFriends.map((person) => (
-                  <Card key={person.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="text-center pb-3">
-                      <Avatar className="h-16 w-16 mx-auto">
-                        <AvatarImage src={person.avatar} />
-                        <AvatarFallback>{person.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <CardTitle className="text-base">{person.name}</CardTitle>
-                      <p className="text-xs text-muted-foreground">{person.location}</p>
-                      <p className="text-xs text-muted-foreground">{person.mutualFriends} mutual friends</p>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      {addedFriends.includes(person.id) ? (
-                        <Button 
-                          variant="outline" 
-                          className="w-full" 
-                          size="sm"
-                          disabled
-                        >
-                          <UserPlus className="mr-2 h-4 w-4" />
-                          Added
-                        </Button>
-                      ) : (
-                        <Button 
-                          className="w-full" 
-                          size="sm"
-                          onClick={() => handleAddFriend(person.id)}
-                        >
-                          <UserPlus className="mr-2 h-4 w-4" />
-                          Add
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin" />
               </div>
-            </div>
+            ) : (
+              <>
+                {/* People You May Know Section */}
+                {suggestions.length > 0 && (
+                  <div className="space-y-4">
+                    <h2 className="text-xl font-semibold">People You May Know</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {suggestions.map((person) => (
+                        <Card key={person.id} className="hover:shadow-lg transition-shadow">
+                          <CardHeader className="text-center pb-3">
+                            <Avatar className="h-16 w-16 mx-auto">
+                              <AvatarImage src={person.profile.avatar_url || undefined} />
+                              <AvatarFallback>{person.profile.display_name?.[0] || '?'}</AvatarFallback>
+                            </Avatar>
+                            <CardTitle className="text-base">{person.profile.display_name}</CardTitle>
+                            <p className="text-xs text-muted-foreground">{person.profile.location}</p>
+                            <p className="text-xs text-muted-foreground">{person.mutual_friends_count} mutual friends</p>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            {requestingSuggestions.includes(person.id) ? (
+                              <Button 
+                                variant="outline" 
+                                className="w-full" 
+                                size="sm"
+                                disabled
+                              >
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Sending...
+                              </Button>
+                            ) : (
+                              <Button 
+                                className="w-full" 
+                                size="sm"
+                                onClick={() => handleAddFriend(person)}
+                              >
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Add
+                              </Button>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
 
             {/* Your Friends Section */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Your Friends</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {friends.map((friend) => (
-                <Card key={friend.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader className="text-center">
-                    <div className="relative mx-auto">
-                      <Avatar className="h-20 w-20">
-                        <AvatarImage src={friend.avatar} />
-                        <AvatarFallback>{friend.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className={`absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-2 border-background ${
-                        friend.status === 'online' ? 'bg-green-500' : 'bg-gray-400'
-                      }`} />
-                    </div>
-                    <CardTitle className="text-lg">{friend.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{friend.location}</p>
-                    <p className="text-xs text-muted-foreground">{friend.mutualFriends} mutual friends</p>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Button 
-                      className="w-full" 
-                      size="sm"
-                      onClick={() => handleMessage(friend)}
-                    >
-                      <MessageCircle className="mr-2 h-4 w-4" />
-                      Message
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
-                      size="sm"
-                      onClick={() => handleViewProfile(friend)}
-                    >
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      View Profile
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            </div>
+            {!loading && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">Your Friends ({friends.length})</h2>
+                
+                {friends.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-lg font-medium">No friends yet</p>
+                    <p className="text-muted-foreground">Add some friends to see them here!</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {friends.map((friend) => (
+                      <Card key={friend.id} className="hover:shadow-lg transition-shadow">
+                        <CardHeader className="text-center">
+                          <div className="relative mx-auto">
+                            <Avatar className="h-20 w-20">
+                              <AvatarImage src={friend.profile.avatar_url || undefined} />
+                              <AvatarFallback>{friend.profile.display_name?.[0] || '?'}</AvatarFallback>
+                            </Avatar>
+                            <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-2 border-background bg-green-500" />
+                          </div>
+                          <CardTitle className="text-lg">{friend.profile.display_name}</CardTitle>
+                          <p className="text-sm text-muted-foreground">{friend.profile.location}</p>
+                          <p className="text-xs text-muted-foreground">{friend.mutual_friends_count || 0} mutual friends</p>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          <Button 
+                            className="w-full" 
+                            size="sm"
+                            onClick={() => handleMessage(friend)}
+                          >
+                            <MessageCircle className="mr-2 h-4 w-4" />
+                            Message
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="w-full" 
+                            size="sm"
+                            onClick={() => handleViewProfile(friend)}
+                          >
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            View Profile
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </main>
       </div>
@@ -219,47 +166,51 @@ const Friends = () => {
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage src={selectedFriend.avatar} />
-                    <AvatarFallback>{selectedFriend.name[0]}</AvatarFallback>
+                    <AvatarImage src={selectedFriend.profile.avatar_url || undefined} />
+                    <AvatarFallback>{selectedFriend.profile.display_name?.[0] || '?'}</AvatarFallback>
                   </Avatar>
-                  <div className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-background ${
-                    selectedFriend.status === 'online' ? 'bg-green-500' : 'bg-gray-400'
-                  }`} />
+                  <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-background bg-green-500" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">{selectedFriend.name}</h3>
-                  <Badge variant={selectedFriend.status === 'online' ? 'default' : 'secondary'}>
-                    {selectedFriend.status}
-                  </Badge>
+                  <h3 className="text-lg font-semibold">{selectedFriend.profile.display_name}</h3>
+                  <Badge variant="default">Online</Badge>
                 </div>
               </div>
               
               <div className="space-y-3">
-                <div className="flex items-center space-x-2 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedFriend.location}</span>
-                </div>
+                {selectedFriend.profile.location && (
+                  <div className="flex items-center space-x-2 text-sm">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{selectedFriend.profile.location}</span>
+                  </div>
+                )}
                 
-                <div className="flex items-center space-x-2 text-sm">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedFriend.email}</span>
-                </div>
+                {selectedFriend.profile.username && (
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span>@{selectedFriend.profile.username}</span>
+                  </div>
+                )}
                 
-                <div className="flex items-center space-x-2 text-sm">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>Joined {selectedFriend.joinDate}</span>
-                </div>
+                 {selectedFriend.profile.created_at && (
+                   <div className="flex items-center space-x-2 text-sm">
+                     <Calendar className="h-4 w-4 text-muted-foreground" />
+                     <span>Joined {new Date(selectedFriend.profile.created_at).toLocaleDateString()}</span>
+                   </div>
+                 )}
                 
                 <div className="flex items-center space-x-2 text-sm">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedFriend.mutualFriends} mutual friends</span>
+                  <span>{('mutual_friends_count' in selectedFriend ? selectedFriend.mutual_friends_count : 0)} mutual friends</span>
                 </div>
               </div>
               
-              <div className="pt-2">
-                <h4 className="font-medium mb-2">About</h4>
-                <p className="text-sm text-muted-foreground">{selectedFriend.bio}</p>
-              </div>
+              {selectedFriend.profile.bio && (
+                <div className="pt-2">
+                  <h4 className="font-medium mb-2">About</h4>
+                  <p className="text-sm text-muted-foreground">{selectedFriend.profile.bio}</p>
+                </div>
+              )}
               
               <div className="flex space-x-2 pt-2">
                 <Button 
