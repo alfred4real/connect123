@@ -202,6 +202,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_mutual_friends_count: {
         Args: { user1_id: string; user2_id: string }
         Returns: number

@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { Home, Users, BookOpen, Calendar, Settings, TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Home, Users, BookOpen, Calendar, Settings, TrendingUp, Shield } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,15 +11,44 @@ import { useNavigate, useLocation } from "react-router-dom";
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const [addedFriends, setAddedFriends] = useState<string[]>([]);
+  const [userRole, setUserRole] = useState<string>('');
   
-  const menuItems = [
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching user role:', error);
+        return;
+      }
+      
+      setUserRole(data.role);
+    };
+
+    fetchUserRole();
+  }, [user]);
+
+  const baseMenuItems = [
     { icon: Home, label: "Feed", path: "/" },
     { icon: Users, label: "Friends", path: "/friends", count: 12 },
     { icon: BookOpen, label: "Pages", path: "/pages", count: 3 },
     { icon: Calendar, label: "Events", path: "/events", count: 2 },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
+
+  const adminMenuItem = { icon: Shield, label: "Admin Panel", path: "/admin", count: undefined };
+  
+  const menuItems = userRole === 'admin' 
+    ? [...baseMenuItems, adminMenuItem] 
+    : baseMenuItems;
 
   const trendingTopics = [
     "#TechNews",
