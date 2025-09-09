@@ -10,8 +10,8 @@ import Friends from "./pages/Friends";
 import Pages from "./pages/Pages";
 import Events from "./pages/Events";
 import Settings from "./pages/Settings";
-import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
