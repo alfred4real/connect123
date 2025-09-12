@@ -79,13 +79,13 @@ const SettingsPage = () => {
     try {
       const { error } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
+        .update({
           display_name: `${firstName} ${lastName}`,
           bio,
           location,
           avatar_url: profileImage
-        });
+        })
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
