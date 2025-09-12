@@ -9,9 +9,53 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings, User, Bell, Shield, Palette, Globe } from "lucide-react";
+import { Settings, User, Bell, Shield, Palette, Globe, Camera } from "lucide-react";
+import { useState, useRef } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const SettingsPage = () => {
+  const [profileImage, setProfileImage] = useState("https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const handlePhotoChange = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setProfileImage(result);
+        toast({
+          title: "Photo updated",
+          description: "Your profile photo has been updated successfully.",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -35,11 +79,30 @@ const SettingsPage = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex items-center space-x-4">
-                    <Avatar className="h-20 w-20">
-                      <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" />
-                      <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                    <Button variant="outline">Change Photo</Button>
+                    <div className="relative">
+                      <Avatar className="h-20 w-20">
+                        <AvatarImage src={profileImage} />
+                        <AvatarFallback>JD</AvatarFallback>
+                      </Avatar>
+                      <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 rounded-full flex items-center justify-center cursor-pointer" onClick={handlePhotoChange}>
+                        <Camera className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Button variant="outline" onClick={handlePhotoChange}>
+                        Change Photo
+                      </Button>
+                      <p className="text-xs text-muted-foreground">
+                        JPG, PNG or GIF. Max size 5MB.
+                      </p>
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
