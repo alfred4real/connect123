@@ -44,11 +44,20 @@ export const useFriends = () => {
     if (!user) return;
 
     try {
+      // Get friends where current user is either the requester or the recipient
       const { data, error } = await supabase
         .from('friends')
         .select(`
           *,
-          profile:profiles!friends_friend_id_fkey(
+          requester_profile:profiles!friends_user_id_fkey(
+            display_name,
+            avatar_url,
+            bio,
+            location,
+            username,
+            created_at
+          ),
+          friend_profile:profiles!friends_friend_id_fkey(
             display_name,
             avatar_url,
             bio,
@@ -57,11 +66,20 @@ export const useFriends = () => {
             created_at
           )
         `)
-        .eq('user_id', user.id)
+        .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
         .eq('status', 'accepted');
 
       if (error) throw error;
-      setFriends((data || []) as Friend[]);
+      
+      // Transform the data to show the other person's profile
+      const transformedFriends = (data || []).map((friendship: any) => ({
+        ...friendship,
+        profile: friendship.user_id === user.id 
+          ? friendship.friend_profile 
+          : friendship.requester_profile
+      }));
+      
+      setFriends(transformedFriends as Friend[]);
     } catch (error) {
       console.error('Error fetching friends:', error);
       toast.error('Failed to load friends');
@@ -155,6 +173,27 @@ export const useFriends = () => {
       Promise.all([fetchFriends(), fetchSuggestions()]).finally(() => {
         setLoading(false);
       });
+
+      // Set up real-time subscription for friends updates
+      const channel = supabase
+        .channel('friends-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'friends',
+            filter: `user_id=eq.${user.id},friend_id=eq.${user.id}`
+          },
+          () => {
+            fetchFriends();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
