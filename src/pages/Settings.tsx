@@ -12,11 +12,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Settings, User, Bell, Shield, Palette, Globe, Camera } from "lucide-react";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const SettingsPage = () => {
   const [profileImage, setProfileImage] = useState("https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face");
+  const [firstName, setFirstName] = useState("John");
+  const [lastName, setLastName] = useState("Doe");
+  const [email, setEmail] = useState("john.doe@example.com");
+  const [bio, setBio] = useState("Software developer passionate about creating amazing user experiences.");
+  const [location, setLocation] = useState("San Francisco, CA");
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handlePhotoChange = () => {
     fileInputRef.current?.click();
@@ -53,6 +62,46 @@ const SettingsPage = () => {
         });
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to save changes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          user_id: user.id,
+          display_name: `${firstName} ${lastName}`,
+          bio,
+          location,
+          avatar_url: profileImage
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Your profile has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,17 +157,30 @@ const SettingsPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" defaultValue="John" />
+                      <Input 
+                        id="firstName" 
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" defaultValue="Doe" />
+                      <Input 
+                        id="lastName" 
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                      />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" defaultValue="john.doe@example.com" />
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
                   </div>
                   
                   <div className="space-y-2">
@@ -126,16 +188,23 @@ const SettingsPage = () => {
                     <Textarea 
                       id="bio" 
                       placeholder="Tell us about yourself..."
-                      defaultValue="Software developer passionate about creating amazing user experiences."
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
                     />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="location">Location</Label>
-                    <Input id="location" defaultValue="San Francisco, CA" />
+                    <Input 
+                      id="location" 
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    />
                   </div>
                   
-                  <Button>Save Changes</Button>
+                  <Button onClick={handleSaveChanges} disabled={loading}>
+                    {loading ? "Saving..." : "Save Changes"}
+                  </Button>
                 </CardContent>
               </Card>
 
