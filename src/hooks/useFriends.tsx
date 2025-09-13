@@ -116,21 +116,31 @@ export const useFriends = () => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
+      // Create bidirectional friendship for immediate acceptance
+      const { error: requestError } = await supabase
         .from('friends')
-        .insert({
-          user_id: user.id,
-          friend_id: friendId,
-          status: 'pending'
-        });
+        .insert([
+          {
+            user_id: user.id,
+            friend_id: friendId,
+            status: 'accepted'  // Auto-accept for demo purposes
+          },
+          {
+            user_id: friendId,
+            friend_id: user.id,
+            status: 'accepted'  // Auto-accept for demo purposes
+          }
+        ]);
 
-      if (error) throw error;
+      if (requestError) throw requestError;
       
-      toast.success('Friend request sent!');
-      await fetchSuggestions(); // Refresh suggestions
+      toast.success('Friend added successfully!');
+      
+      // Refresh both friends and suggestions
+      await Promise.all([fetchFriends(), fetchSuggestions()]);
     } catch (error) {
       console.error('Error sending friend request:', error);
-      toast.error('Failed to send friend request');
+      toast.error('Failed to add friend');
     }
   };
 
