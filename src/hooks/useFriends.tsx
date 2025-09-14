@@ -116,6 +116,18 @@ export const useFriends = () => {
     if (!user) return;
 
     try {
+      // Check if friendship already exists
+      const { data: existingFriendship } = await supabase
+        .from('friends')
+        .select('id')
+        .or(`and(user_id.eq.${user.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${user.id})`)
+        .limit(1);
+
+      if (existingFriendship && existingFriendship.length > 0) {
+        toast.error('You are already friends with this person');
+        return;
+      }
+
       // Create bidirectional friendship for immediate acceptance
       const { error: requestError } = await supabase
         .from('friends')
