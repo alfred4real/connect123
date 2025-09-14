@@ -7,14 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate, useLocation } from "react-router-dom";
-
+import { useFriends } from "@/hooks/useFriends";
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
   const [addedFriends, setAddedFriends] = useState<string[]>([]);
   const [userRole, setUserRole] = useState<string>('');
-  
+  const { friends } = useFriends();
   useEffect(() => {
     const fetchUserRole = async () => {
       if (!user) return;
@@ -50,6 +50,10 @@ const Sidebar = () => {
     ? [...baseMenuItems, adminMenuItem] 
     : baseMenuItems;
 
+  const dynamicMenuItems = menuItems.map((item) =>
+    item.label === 'Friends' ? { ...item, count: friends.length } : item
+  );
+
   const trendingTopics = [
     "#TechNews",
     "#WebDevelopment", 
@@ -74,7 +78,7 @@ const Sidebar = () => {
       <Card>
         <CardContent className="p-4">
           <nav className="space-y-2">
-            {menuItems.map((item, index) => (
+            {dynamicMenuItems.map((item, index) => (
               <Button
                 key={index}
                 variant={location.pathname === item.path ? "default" : "ghost"}
